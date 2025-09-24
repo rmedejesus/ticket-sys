@@ -1,0 +1,159 @@
+basePath: /api/v1
+host: localhost:8080
+info:
+  contact: {}
+  description: 8===D----
+  title: SJ Ticketing API Go F*ck Yourself
+  version: "1.0"
+paths:
+  /login:
+    post:
+      description: Log a user in
+      operationId: login-user
+      parameters:
+      - description: Email Address
+        in: path
+        name: email
+        required: true
+        type: string
+      - description: Password
+        in: path
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Invalid login data
+        "401":
+          description: Unauthorized user
+      summary: Login User
+  /refresh-token:
+    post:
+      description: Refresh token for re-authentication
+      operationId: refresh-token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Token refresh failed
+        "401":
+          description: Unauthorized user
+      summary: Refresh a Token
+  /register:
+    post:
+      description: Create a new user
+      operationId: create-user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Invalid input format
+      summary: Create New User
+  /tickets:
+    get:
+      description: List all tickets available
+      operationId: get-tickets
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+        "500":
+          description: Database error
+      security:
+      - Bearer: []
+      summary: Get All Tickets
+    post:
+      description: Create a new ticket
+      operationId: create-ticket
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Bad request
+      security:
+      - Bearer: []
+      summary: Create New Ticket
+  /tickets/{id}:
+    delete:
+      description: Delete single ticket
+      operationId: delete-ticket
+      parameters:
+      - description: Ticket ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Invalid ticket ID
+      security:
+      - Bearer: []
+      summary: Delete a Ticket
+    get:
+      description: Get single ticket
+      operationId: get-ticket
+      parameters:
+      - description: Ticket ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Invalid ticket ID
+        "500":
+          description: Database error
+      security:
+      - Bearer: []
+      summary: Get a Ticket
+    patch:
+      description: Update single ticket
+      operationId: update-ticket
+      parameters:
+      - description: Ticket ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Invalid ticket ID
+        "404":
+          description: Ticket not found
+        "500":
+          description: Database error
+      security:
+      - Bearer: []
+      summary: Update a Ticket
+schemes:
+- http
+securityDefinitions:
+  Bearer:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
