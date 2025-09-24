@@ -46,11 +46,11 @@ func Load() (*Config, error) {
 	cfg.Server.WriteTimeout = time.Second * 15
 
 	// Database config
-	cfg.Database.Host = getEnv("DB_HOST", "db.bjokbfwbgmizvyrkonzs.supabase.co")
+	cfg.Database.Host = getEnv("DB_HOST", "localhost")
 	cfg.Database.Port = getEnv("DB_PORT", "5432")
-	cfg.Database.User = getEnv("DB_USER", "postgres")
-	cfg.Database.Password = getEnv("DB_PASSWORD", "postgres")
-	cfg.Database.DBName = getEnv("DB_NAME", "postgres")
+	cfg.Database.User = getEnv("DB_USER", "rmedejesus")
+	cfg.Database.Password = getEnv("DB_PASSWORD", "rmdj1q2w3e")
+	cfg.Database.DBName = getEnv("DB_NAME", "ticketing_db")
 	cfg.Database.SSLMode = getEnv("DB_SSLMODE", "disable")
 
 	// JWT config
