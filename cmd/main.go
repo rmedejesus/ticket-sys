@@ -1,16 +1,17 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"ticket-sys/internal/config"
-	"ticket-sys/internal/database"
 	"ticket-sys/internal/handlers"
 	"ticket-sys/internal/middleware"
 
 	_ "ticket-sys/cmd/docs"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -33,11 +34,16 @@ func main() {
 	}
 
 	// Initialize database
-	db, err := database.NewDatabase(cfg.GetDSN())
+	// db, err := database.NewDatabase(cfg.GetDSN())
+	// if err != nil {
+	// 	log.Fatal("Failed to connect to database:", err)
+	// }
+	// defer db.DB.Close()
+	conn, err := pgx.Connect(context.Background(), cfg.Database.URL)
 	if err != nil {
-		log.Fatal("Failed to connect to database:", err)
+		log.Fatalf("Failed to connect to the database: %v", err)
 	}
-	defer db.DB.Close()
+	defer conn.Close(context.Background())
 
 	// Set Gin mode
 	if cfg.Environment == "production" {
@@ -63,7 +69,7 @@ func main() {
 	})
 
 	// Initialize handlers with JWT configuration
-	authHandler := handlers.NewAuthHandler(db, []byte(cfg.JWT.Secret))
+	authHandler := handlers.NewAuthHandler(conn, []byte(cfg.JWT.Secret))
 
 	// Public routes access
 	public := r.Group("/api/v1")

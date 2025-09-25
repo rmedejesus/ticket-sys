@@ -1,16 +1,17 @@
 package handlers
 
 import (
-	"database/sql"
+	"context"
 	"fmt"
 	"net/http"
 	"net/smtp"
-	"ticket-sys/internal/models"
 	"strconv"
 	"strings"
+	"ticket-sys/internal/models"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
 )
 
 // Create ticket
@@ -35,7 +36,7 @@ func (h *AuthHandler) CreateTicket(c *gin.Context) {
 	}
 
 	// Insert user with transaction
-	tx, err := h.db.DB.Begin()
+	tx, err := h.db.Begin(context.Background())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Transaction start failed"})
 		return
@@ -50,7 +51,7 @@ func (h *AuthHandler) CreateTicket(c *gin.Context) {
 	//  }
 
 	var id int
-	err = tx.QueryRow(`
+	err = tx.QueryRow(context.Background(), `
         INSERT INTO ticket 
         VALUES (DEFAULT, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) 
         RETURNING id`,
@@ -71,12 +72,12 @@ func (h *AuthHandler) CreateTicket(c *gin.Context) {
 	).Scan(&id)
 
 	if err != nil {
-		tx.Rollback()
+		tx.Rollback(context.Background())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ticket creation failed"})
 		return
 	}
 
-	if err = tx.Commit(); err != nil {
+	if err = tx.Commit(context.Background()); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Transaction commit failed"})
 		return
 	}
@@ -84,7 +85,7 @@ func (h *AuthHandler) CreateTicket(c *gin.Context) {
 	var email string
 	var firstName string
 	var lastName string
-	dbErr := h.db.DB.QueryRow(`
+	dbErr := h.db.QueryRow(context.Background(), `
         SELECT first_name, last_name, email 
         FROM staff_user 
         WHERE id = $1`,
@@ -180,7 +181,7 @@ func (h *AuthHandler) CreateTicket(c *gin.Context) {
 func (h *AuthHandler) GetTickets(c *gin.Context) {
 	var tickets []models.Ticket
 
-	rows, err := h.db.DB.Query("SELECT * FROM ticket ORDER BY creation_date DESC")
+	rows, err := h.db.Query(context.Background(), "SELECT * FROM ticket ORDER BY creation_date DESC")
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
@@ -255,7 +256,7 @@ func (h *AuthHandler) GetTicket(c *gin.Context) {
 		return
 	}
 
-	dbErr := h.db.DB.QueryRow(`
+	dbErr := h.db.QueryRow(context.Background(), `
         SELECT * 
         FROM ticket 
         WHERE id = $1`,
@@ -316,7 +317,7 @@ func (h *AuthHandler) UpdateTicket(c *gin.Context) {
 	}
 
 	var exists bool
-	databaseErr := h.db.DB.QueryRow("SELECT EXISTS(SELECT 1 FROM ticket WHERE id = $1)",
+	databaseErr := h.db.QueryRow(context.Background(), "SELECT EXISTS(SELECT 1 FROM ticket WHERE id = $1)",
 		id).Scan(&exists)
 	if databaseErr != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
@@ -327,7 +328,7 @@ func (h *AuthHandler) UpdateTicket(c *gin.Context) {
 		return
 	}
 
-	result := patchUserRecord(h.db.DB, ticketUpdate, id)
+	result := patchUserRecord(h.db, ticketUpdate, id)
 	if result == http.StatusNotFound {
 		c.JSON(http.StatusNotFound, gin.H{"error": "No data to update for ticket"})
 		return
@@ -339,7 +340,7 @@ func (h *AuthHandler) UpdateTicket(c *gin.Context) {
 
 	// Verify the update
 	var updatedTicket models.Ticket
-	dbErr := h.db.DB.QueryRow(`
+	dbErr := h.db.QueryRow(context.Background(), `
         SELECT * 
         FROM ticket 
         WHERE id = $1`,
@@ -370,7 +371,7 @@ func (h *AuthHandler) UpdateTicket(c *gin.Context) {
 	var email string
 	var firstName string
 	var lastName string
-	userErr := h.db.DB.QueryRow(`
+	userErr := h.db.QueryRow(context.Background(), `
         SELECT first_name, last_name, email 
         FROM staff_user 
         WHERE id = $1`,
@@ -474,7 +475,7 @@ func (h *AuthHandler) UpdatePendingTicket(c *gin.Context) {
 	}
 
 	var exists bool
-	databaseErr := h.db.DB.QueryRow("SELECT EXISTS(SELECT 1 FROM ticket WHERE id = $1)",
+	databaseErr := h.db.QueryRow(context.Background(), "SELECT EXISTS(SELECT 1 FROM ticket WHERE id = $1)",
 		id).Scan(&exists)
 	if databaseErr != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
@@ -485,14 +486,14 @@ func (h *AuthHandler) UpdatePendingTicket(c *gin.Context) {
 		return
 	}
 
-	tx, err := h.db.DB.Begin()
+	tx, err := h.db.Begin(context.Background())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Transaction start failed"})
 		return
 	}
 
 	var updatedTicket models.Ticket
-	err = tx.QueryRow(`
+	err = tx.QueryRow(context.Background(), `
         UPDATE ticket 
         SET task_status = 'Pending'
 				WHERE id = $1
@@ -514,12 +515,12 @@ func (h *AuthHandler) UpdatePendingTicket(c *gin.Context) {
 		&updatedTicket.CompletionDate)
 
 	if err != nil {
-		tx.Rollback()
+		tx.Rollback(context.Background())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ticket creation failed"})
 		return
 	}
 
-	if err = tx.Commit(); err != nil {
+	if err = tx.Commit(context.Background()); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Transaction commit failed"})
 		return
 	}
@@ -527,7 +528,7 @@ func (h *AuthHandler) UpdatePendingTicket(c *gin.Context) {
 	var email string
 	var firstName string
 	var lastName string
-	userErr := h.db.DB.QueryRow(`
+	userErr := h.db.QueryRow(context.Background(), `
         SELECT first_name, last_name, email 
         FROM staff_user 
         WHERE id = $1`,
@@ -631,7 +632,7 @@ func (h *AuthHandler) UpdateCompletedTicket(c *gin.Context) {
 	}
 
 	var exists bool
-	databaseErr := h.db.DB.QueryRow("SELECT EXISTS(SELECT 1 FROM ticket WHERE id = $1)",
+	databaseErr := h.db.QueryRow(context.Background(), "SELECT EXISTS(SELECT 1 FROM ticket WHERE id = $1)",
 		id).Scan(&exists)
 	if databaseErr != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
@@ -642,14 +643,14 @@ func (h *AuthHandler) UpdateCompletedTicket(c *gin.Context) {
 		return
 	}
 
-	tx, err := h.db.DB.Begin()
+	tx, err := h.db.Begin(context.Background())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Transaction start failed"})
 		return
 	}
 
 	var updatedTicket models.Ticket
-	err = tx.QueryRow(`
+	err = tx.QueryRow(context.Background(), `
         UPDATE ticket 
         SET task_status = 'Completed'
 				WHERE id = $1
@@ -671,12 +672,12 @@ func (h *AuthHandler) UpdateCompletedTicket(c *gin.Context) {
 		&updatedTicket.CompletionDate)
 
 	if err != nil {
-		tx.Rollback()
+		tx.Rollback(context.Background())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ticket creation failed"})
 		return
 	}
 
-	if err = tx.Commit(); err != nil {
+	if err = tx.Commit(context.Background()); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Transaction commit failed"})
 		return
 	}
@@ -684,7 +685,7 @@ func (h *AuthHandler) UpdateCompletedTicket(c *gin.Context) {
 	var email string
 	var firstName string
 	var lastName string
-	userErr := h.db.DB.QueryRow(`
+	userErr := h.db.QueryRow(context.Background(), `
         SELECT first_name, last_name, email 
         FROM staff_user 
         WHERE id = $1`,
@@ -785,18 +786,18 @@ func (h *AuthHandler) DeleteTicket(c *gin.Context) {
 		return
 	}
 
-	result, dbErr := h.db.DB.ExecContext(c, "DELETE FROM ticket WHERE id = $1", id)
+	result, dbErr := h.db.Exec(context.Background(), "DELETE FROM ticket WHERE id = $1", id)
 	if dbErr != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Database error"})
 		return
 	}
-	rowsAffected, dbErr := result.RowsAffected()
-	if dbErr != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Database error"})
-		return
-	}
+	// rowsAffected, dbErr := result.RowsAffected()
+	// if dbErr != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Database error"})
+	// 	return
+	// }
 
-	if rowsAffected == 0 {
+	if result.RowsAffected() == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "No record deleted"})
 		return
 	}
@@ -805,7 +806,7 @@ func (h *AuthHandler) DeleteTicket(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"id": id})
 }
 
-func patchUserRecord(db *sql.DB, ticketUpdate models.TicketUpdate, id int) int {
+func patchUserRecord(db *pgx.Conn, ticketUpdate models.TicketUpdate, id int) int {
 	setClauses := []string{}
 
 	if ticketUpdate.ReportedBy != "" {
@@ -851,13 +852,22 @@ func patchUserRecord(db *sql.DB, ticketUpdate models.TicketUpdate, id int) int {
 
 	query := fmt.Sprintf("UPDATE ticket SET %s WHERE id = %d", strings.Join(setClauses, ", "), id)
 
-	stmt, err := db.Prepare(query)
-	if err != nil {
-		return http.StatusBadRequest
-	}
-	defer stmt.Close()
+	// Prepare the statement
+	// stmtName := "updateTicketByID"
+	// _, err := db.Prepare(context.Background(), stmtName, query)
+	// if err != nil {
+	// 	return http.StatusBadRequest
+	// }
 
-	_, err = stmt.Exec()
+	_, err := db.Exec(context.Background(), query)
+
+	// stmt, err := db.Prepare(context.Background(), "updateUserByID", query)
+	// if err != nil {
+	// 	return http.StatusBadRequest
+	// }
+	// defer stmt.Close(context.Background())
+
+	// _, err = stmt.Exec()
 	if err != nil {
 		return http.StatusBadRequest
 	}

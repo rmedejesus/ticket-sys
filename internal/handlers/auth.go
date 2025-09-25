@@ -1,20 +1,21 @@
 package handlers
 
 import (
+	"context"
 	"database/sql"
 	"net/http"
 	"strconv"
-	"ticket-sys/internal/database"
 	"ticket-sys/internal/models"
 	"ticket-sys/internal/utils"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/jackc/pgx/v5"
 )
 
 type AuthHandler struct {
-	db        *database.Database
+	db        *pgx.Conn
 	jwtSecret []byte
 	// Add token expiration configuration
 	tokenExpiration        time.Duration
@@ -22,7 +23,16 @@ type AuthHandler struct {
 }
 
 // NewAuthHandler creates a new authentication handler
-func NewAuthHandler(db *database.Database, jwtSecret []byte) *AuthHandler {
+// func NewAuthHandler(db *database.Database, jwtSecret []byte) *AuthHandler {
+// 	return &AuthHandler{
+// 		db:                     db,
+// 		jwtSecret:              jwtSecret,
+// 		tokenExpiration:        15 * time.Minute, // Default 15 minutes
+// 		refreshTokenExpiration: 24 * time.Hour,
+// 	}
+// }
+
+func NewAuthHandler(db *pgx.Conn, jwtSecret []byte) *AuthHandler {
 	return &AuthHandler{
 		db:                     db,
 		jwtSecret:              jwtSecret,
@@ -59,7 +69,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 
 	// Check if user already exists
 	var exists bool
-	err := h.db.DB.QueryRow("SELECT EXISTS(SELECT 1 FROM staff_user WHERE email = $1)",
+	err := h.db.QueryRow(context.Background(), "SELECT EXISTS(SELECT 1 FROM staff_user WHERE email = $1)",
 		user.Email).Scan(&exists)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
@@ -78,14 +88,14 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	}
 
 	// Insert user with transaction
-	tx, err := h.db.DB.Begin()
+	tx, err := h.db.Begin(context.Background())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Transaction start failed"})
 		return
 	}
 
 	var id int
-	err = tx.QueryRow(`
+	err = tx.QueryRow(context.Background(), `
         INSERT INTO staff_user 
         VALUES (DEFAULT, $1, $2, $3, $4) 
         RETURNING id`,
@@ -93,12 +103,12 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	).Scan(&id)
 
 	if err != nil {
-		tx.Rollback()
+		tx.Rollback(context.Background())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "User creation failed"})
 		return
 	}
 
-	if err = tx.Commit(); err != nil {
+	if err = tx.Commit(context.Background()); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Transaction commit failed"})
 		return
 	}
@@ -120,7 +130,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 func (h *AuthHandler) GetUsers(c *gin.Context) {
 	var users []models.User
 
-	rows, err := h.db.DB.Query("SELECT * FROM staff_user")
+	rows, err := h.db.Query(context.Background(), "SELECT * FROM staff_user")
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
@@ -174,7 +184,7 @@ func (h *AuthHandler) GetUser(c *gin.Context) {
 		return
 	}
 
-	dbErr := h.db.DB.QueryRow(`
+	dbErr := h.db.QueryRow(context.Background(), `
         SELECT * 
         FROM staff_user 
         WHERE id = $1`,
@@ -214,7 +224,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	// Get user from database
 	var user models.User
-	err := h.db.DB.QueryRow(`
+	err := h.db.QueryRow(context.Background(), `
         SELECT id, first_name, last_name, password
         FROM staff_user 
         WHERE email = $1`,
