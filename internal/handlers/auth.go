@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"strconv"
 	"ticket-sys/internal/models"
@@ -232,6 +233,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	if err != nil {
 		// Don't specify whether email or password was wrong
+		log.Fatal("Failed to load config:", err)
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err})
 		return
 	}
