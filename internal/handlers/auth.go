@@ -226,7 +226,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	err := h.db.QueryRow(context.Background(), `
         SELECT id, first_name, last_name, password
         FROM staff_user 
-        WHERE email = $1`,
+        WHERE email = '$1'`,
 		login.Email,
 	).Scan(&user.ID, &user.FirstName, &user.LastName, &user.Password)
 
