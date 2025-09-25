@@ -243,7 +243,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	// Verify password
 	if !utils.CheckPasswordHash(login.Password, user.Password) {
 		// Use same message as above for security
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid password"})
 		return
 	}
 
