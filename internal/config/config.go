@@ -53,7 +53,7 @@ func Load() (*Config, error) {
 	cfg.Database.Password = getEnv("DB_PASSWORD", "rmdj1q2w3e")
 	cfg.Database.DBName = getEnv("DB_NAME", "ticketing_db")
 	cfg.Database.SSLMode = getEnv("DB_SSLMODE", "disable")
-	cfg.Database.URL = getEnv("DB_URL", "postgresql://postgres.bjokbfwbgmizvyrkonzs:UYhOthonE04P7t9G@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres")
+	cfg.Database.URL = getEnv("DB_URL", "postgresql://postgres.bjokbfwbgmizvyrkonzs:UYhOthonE04P7t9G@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres")
 
 	// JWT config
 	cfg.JWT.Secret = getEnv("JWT_SECRET", "cce464308fc5156d964d4f525886e33db23e7d48e2d87a13b0b4bfb8468425e7")
