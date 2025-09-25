@@ -60,7 +60,7 @@ func Load() (*Config, error) {
 	cfg.JWT.TokenExpiry = time.Minute       // 24 hours
 	cfg.JWT.RefreshExpiry = time.Hour * 168 // 7 days
 
-	cfg.Environment = getEnv("ENV", "development")
+	cfg.Environment = getEnv("ENV", "production")
 
 	return cfg, nil
 }
