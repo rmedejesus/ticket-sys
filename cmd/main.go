@@ -101,21 +101,23 @@ func main() {
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	// Start server with configured host and port
-	serverAddr := ":" + cfg.Server.Port
-	log.Printf("Server starting on %s", serverAddr)
+	//serverAddr := ":" + cfg.Server.Port
+	//log.Printf("Server starting on %s", serverAddr)
 
 	//certFile := "onrender-cert.pem"     // or "server.crt" if using OpenSSL
 	//keyFile := "192.168.1.57+1-key.pem" // or "server.key" if using OpenSSL
 
-	srv := &http.Server{
-		Addr:         serverAddr,
-		Handler:      r,
-		ReadTimeout:  cfg.Server.ReadTimeout,
-		WriteTimeout: cfg.Server.WriteTimeout,
-	}
+	// srv := &http.Server{
+	// 	Addr:    serverAddr,
+	// 	Handler: r,
+	// }
 
-	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Fatal("Server failed to start:", err)
+	// if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+	// 	log.Fatal("Server failed to start:", err)
+	// }
+
+	if err := r.Run(":" + cfg.Server.Port); err != nil {
+		log.Panicf("error: %s", err)
 	}
 }
 

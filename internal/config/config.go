@@ -10,10 +10,8 @@ import (
 
 type Config struct {
 	Server struct {
-		Port         string
-		Host         string
-		ReadTimeout  time.Duration
-		WriteTimeout time.Duration
+		Port string
+		Host string
 	}
 
 	Database struct {
@@ -41,10 +39,8 @@ func Load() (*Config, error) {
 	cfg := &Config{}
 
 	// Server config
-	cfg.Server.Port = getEnv("SERVER_PORT", "5431")
+	cfg.Server.Port = getEnv("SERVER_PORT", "8080")
 	cfg.Server.Host = getEnv("SERVER_HOST", "0.0.0.0")
-	cfg.Server.ReadTimeout = time.Second * 15
-	cfg.Server.WriteTimeout = time.Second * 15
 
 	// Database config
 	cfg.Database.Host = getEnv("DB_HOST", "localhost")
