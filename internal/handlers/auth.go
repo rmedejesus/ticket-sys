@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"database/sql"
 	"net/http"
 	"strconv"
 	"ticket-sys/internal/models"
@@ -231,7 +230,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		login.Email,
 	).Scan(&user.ID, &user.FirstName, &user.LastName, &user.Password)
 
-	if err == sql.ErrNoRows {
+	if err != nil {
 		// Don't specify whether email or password was wrong
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
