@@ -101,7 +101,7 @@ func main() {
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	// Start server with configured host and port
-	serverAddr := cfg.Server.Host + ":" + cfg.Server.Port
+	serverAddr := ":" + cfg.Server.Port
 	log.Printf("Server starting on %s", serverAddr)
 
 	//certFile := "onrender-cert.pem"     // or "server.crt" if using OpenSSL
