@@ -232,7 +232,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	if err != nil {
 		// Don't specify whether email or password was wrong
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err})
 		return
 	}
 	// if err != nil {
