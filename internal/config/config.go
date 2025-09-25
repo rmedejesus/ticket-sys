@@ -40,7 +40,7 @@ func Load() (*Config, error) {
 
 	// Server config
 	cfg.Server.Port = getEnv("SERVER_PORT", "8080")
-	cfg.Server.Host = getEnv("SERVER_HOST", "0.0.0.0")
+	cfg.Server.Host = getEnv("SERVER_HOST", "192.168.1.57")
 
 	// Database config
 	cfg.Database.Host = getEnv("DB_HOST", "localhost")
