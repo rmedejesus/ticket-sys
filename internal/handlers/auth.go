@@ -3,10 +3,10 @@ package handlers
 import (
 	"database/sql"
 	"net/http"
+	"strconv"
 	"ticket-sys/internal/database"
 	"ticket-sys/internal/models"
 	"ticket-sys/internal/utils"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -200,8 +200,7 @@ func (h *AuthHandler) GetUser(c *gin.Context) {
 // @Description Log a user in
 // @ID login-user
 // @Produce json
-// @Param email path string true "Email Address"
-// @Param password path string true "Password"
+// @Param user_login body models.UserLogin true "User Login"
 // @Success 200 "Successful response"
 // @Failure 400 "Invalid login data"
 // @Failure 401 "Unauthorized user"

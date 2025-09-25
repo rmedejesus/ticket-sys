@@ -15,10 +15,10 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// @title SJ Ticketing API Go F*ck Yourself
+// @title SJ Ticketing API
 // @version 1.0
-// @description 8===D----
-// @host localhost:8080
+// @description Ticketing API v1.0
+// @host 192.168.1.57:8080
 // @BasePath /api/v1
 // @schemes http
 // @securityDefinitions.apikey Bearer
@@ -97,6 +97,9 @@ func main() {
 	// Start server with configured host and port
 	serverAddr := cfg.Server.Host + ":" + cfg.Server.Port
 	log.Printf("Server starting on %s", serverAddr)
+
+	//certFile := "onrender-cert.pem"     // or "server.crt" if using OpenSSL
+	//keyFile := "192.168.1.57+1-key.pem" // or "server.key" if using OpenSSL
 
 	srv := &http.Server{
 		Addr:         serverAddr,

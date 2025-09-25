@@ -25,18 +25,13 @@ const docTemplate = `{
                 "operationId": "login-user",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Email Address",
-                        "name": "email",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Password",
-                        "name": "password",
-                        "in": "path",
-                        "required": true
+                        "description": "User Login",
+                        "name": "user_login",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UserLogin"
+                        }
                     }
                 ],
                 "responses": {
@@ -235,6 +230,117 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/tickets/{id}/completed": {
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update ticket status to completed",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Update a Ticket status to completed",
+                "operationId": "update-ticket-completed",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Ticket ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    },
+                    "400": {
+                        "description": "Invalid ticket ID"
+                    },
+                    "404": {
+                        "description": "Ticket not found"
+                    },
+                    "500": {
+                        "description": "Database error"
+                    }
+                }
+            }
+        },
+        "/tickets/{id}/pending": {
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update ticket status to pending",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Update a Ticket status to pending",
+                "operationId": "update-ticket-pending",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Ticket ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    },
+                    "400": {
+                        "description": "Invalid ticket ID"
+                    },
+                    "404": {
+                        "description": "Ticket not found"
+                    },
+                    "500": {
+                        "description": "Database error"
+                    }
+                }
+            }
+        },
+        "/users": {
+            "get": {
+                "description": "Get Single User",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get Single User",
+                "operationId": "get-user",
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    },
+                    "400": {
+                        "description": "Database error"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.UserLogin": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
         }
     },
     "securityDefinitions": {
@@ -250,11 +356,11 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "192.168.1.57:8080",
 	BasePath:         "/api/v1",
 	Schemes:          []string{"http"},
-	Title:            "SJ Ticketing API Go F*ck Yourself",
-	Description:      "8===D----",
+	Title:            "SJ Ticketing API",
+	Description:      "Ticketing API v1.0",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

@@ -4,12 +4,12 @@
     ],
     "swagger": "2.0",
     "info": {
-        "description": "8===D----",
-        "title": "SJ Ticketing API Go F*ck Yourself",
+        "description": "Ticketing API v1.0",
+        "title": "SJ Ticketing API",
         "contact": {},
         "version": "1.0"
     },
-    "host": "localhost:8080",
+    "host": "192.168.1.57:8080",
     "basePath": "/api/v1",
     "paths": {
         "/login": {
@@ -22,18 +22,13 @@
                 "operationId": "login-user",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Email Address",
-                        "name": "email",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Password",
-                        "name": "password",
-                        "in": "path",
-                        "required": true
+                        "description": "User Login",
+                        "name": "user_login",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UserLogin"
+                        }
                     }
                 ],
                 "responses": {
@@ -230,6 +225,117 @@
                     "500": {
                         "description": "Database error"
                     }
+                }
+            }
+        },
+        "/tickets/{id}/completed": {
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update ticket status to completed",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Update a Ticket status to completed",
+                "operationId": "update-ticket-completed",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Ticket ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    },
+                    "400": {
+                        "description": "Invalid ticket ID"
+                    },
+                    "404": {
+                        "description": "Ticket not found"
+                    },
+                    "500": {
+                        "description": "Database error"
+                    }
+                }
+            }
+        },
+        "/tickets/{id}/pending": {
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update ticket status to pending",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Update a Ticket status to pending",
+                "operationId": "update-ticket-pending",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Ticket ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    },
+                    "400": {
+                        "description": "Invalid ticket ID"
+                    },
+                    "404": {
+                        "description": "Ticket not found"
+                    },
+                    "500": {
+                        "description": "Database error"
+                    }
+                }
+            }
+        },
+        "/users": {
+            "get": {
+                "description": "Get Single User",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get Single User",
+                "operationId": "get-user",
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    },
+                    "400": {
+                        "description": "Database error"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.UserLogin": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
                 }
             }
         }
