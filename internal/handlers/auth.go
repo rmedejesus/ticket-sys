@@ -235,10 +235,10 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Login process failed"})
-		return
-	}
+	// if err != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Login process failed"})
+	// 	return
+	// }
 
 	// Verify password
 	if !utils.CheckPasswordHash(login.Password, user.Password) {
