@@ -116,7 +116,7 @@ func main() {
 	// 	log.Fatal("Server failed to start:", err)
 	// }
 
-	if err := r.Run(":" + cfg.Server.Port); err != nil {
+	if err := r.Run(); err != nil {
 		log.Panicf("error: %s", err)
 	}
 }

@@ -181,7 +181,7 @@ func (h *AuthHandler) CreateTicket(c *gin.Context) {
 func (h *AuthHandler) GetTickets(c *gin.Context) {
 	var tickets []models.Ticket
 
-	rows, err := h.db.Query(context.Background(), "SELECT * FROM ticket ORDER BY creation_date DESC")
+	rows, err := h.db.Query(context.Background(), "SELECT id, reported_by, accommodation_name, accommodation_room_number, accommodation_specific_location, accommodation_type, request_type, request_detail, task_status, task_priority, alert_level, assigned_to, note, image, creation_date::text, completion_date::text  FROM ticket ORDER BY creation_date DESC")
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
@@ -214,8 +214,8 @@ func (h *AuthHandler) GetTickets(c *gin.Context) {
 			return
 		}
 
-		//layout := "2025-09-17T16:08:10.468588+09:00"
-		t, parseErr := time.Parse(time.RFC3339Nano, ticket.CreatedDate)
+		layout := "2006-01-02 15:04:05.000000+00"
+		t, parseErr := time.Parse(layout, ticket.CreatedDate)
 		if parseErr != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Process failed"})
 			return
@@ -257,7 +257,7 @@ func (h *AuthHandler) GetTicket(c *gin.Context) {
 	}
 
 	dbErr := h.db.QueryRow(context.Background(), `
-        SELECT * 
+        SELECT id, reported_by, accommodation_name, accommodation_room_number, accommodation_specific_location, accommodation_type, request_type, request_detail, task_status, task_priority, alert_level, assigned_to, note, image, creation_date::text, completion_date::text
         FROM ticket 
         WHERE id = $1`,
 		id,
@@ -341,7 +341,7 @@ func (h *AuthHandler) UpdateTicket(c *gin.Context) {
 	// Verify the update
 	var updatedTicket models.Ticket
 	dbErr := h.db.QueryRow(context.Background(), `
-        SELECT * 
+        SELECT id, reported_by, accommodation_name, accommodation_room_number, accommodation_specific_location, accommodation_type, request_type, request_detail, task_status, task_priority, alert_level, assigned_to, note, image, creation_date::text, completion_date::text 
         FROM ticket 
         WHERE id = $1`,
 		id,
@@ -497,7 +497,7 @@ func (h *AuthHandler) UpdatePendingTicket(c *gin.Context) {
         UPDATE ticket 
         SET task_status = 'Pending'
 				WHERE id = $1
-        RETURNING *`, id).Scan(&updatedTicket.ID,
+        RETURNING id, reported_by, accommodation_name, accommodation_room_number, accommodation_specific_location, accommodation_type, request_type, request_detail, task_status, task_priority, alert_level, assigned_to, note, image, creation_date::text, completion_date::text`, id).Scan(&updatedTicket.ID,
 		&updatedTicket.ReportedBy,
 		&updatedTicket.AccommodationName,
 		&updatedTicket.AccommodationRoomNumber,
@@ -587,7 +587,7 @@ func (h *AuthHandler) UpdatePendingTicket(c *gin.Context) {
 					Notes: ` + updatedTicket.Note +
 		`</li>
 			</ul>
-			<a href="http://192.168.1.57:9000/dashboard">Go To Ticketing Management System</a>
+			<a href="https://ticket-web-wu7p.onrender.com/">Go To Ticketing Management System</a>
 	`
 
 	server := "smtp.office365.com:587"
@@ -654,7 +654,7 @@ func (h *AuthHandler) UpdateCompletedTicket(c *gin.Context) {
         UPDATE ticket 
         SET task_status = 'Completed'
 				WHERE id = $1
-        RETURNING *`, id).Scan(&updatedTicket.ID,
+        RETURNING id, reported_by, accommodation_name, accommodation_room_number, accommodation_specific_location, accommodation_type, request_type, request_detail, task_status, task_priority, alert_level, assigned_to, note, image, creation_date::text, completion_date::text`, id).Scan(&updatedTicket.ID,
 		&updatedTicket.ReportedBy,
 		&updatedTicket.AccommodationName,
 		&updatedTicket.AccommodationRoomNumber,
@@ -744,7 +744,7 @@ func (h *AuthHandler) UpdateCompletedTicket(c *gin.Context) {
 					Notes: ` + updatedTicket.Note +
 		`</li>
 			</ul>
-			<a href="http://192.168.1.57:9000/dashboard">Go To Ticketing Management System</a>
+			<a href="https://ticket-web-wu7p.onrender.com/">Go To Ticketing Management System</a>
 	`
 
 	server := "smtp.office365.com:587"
