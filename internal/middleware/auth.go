@@ -7,7 +7,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"golang.org/x/time/rate"
 )
 
 // AuthMiddleware verifies JWT tokens in incoming requests
@@ -77,14 +76,14 @@ func AuthMiddleware(jwtSecret []byte) gin.HandlerFunc {
 }
 
 // RateLimiter middleware to prevent brute force attacks
-func RateLimiter() gin.HandlerFunc {
-	limiter := rate.NewLimiter(rate.Every(time.Second), 10)
-	return func(c *gin.Context) {
-		if !limiter.Allow() {
-			c.JSON(http.StatusTooManyRequests, gin.H{"error": "Too many requests"})
-			c.Abort()
-			return
-		}
-		c.Next()
-	}
-}
+// func RateLimiter() gin.HandlerFunc {
+// 	limiter := rate.NewLimiter(rate.Every(time.Second), 10)
+// 	return func(c *gin.Context) {
+// 		if !limiter.Allow() {
+// 			c.JSON(http.StatusTooManyRequests, gin.H{"error": "Too many requests"})
+// 			c.Abort()
+// 			return
+// 		}
+// 		c.Next()
+// 	}
+// }

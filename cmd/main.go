@@ -10,6 +10,7 @@ import (
 
 	_ "ticket-sys/cmd/docs"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
 	swaggerfiles "github.com/swaggo/files"
@@ -56,17 +57,30 @@ func main() {
 	r.Use(gin.Logger())
 
 	// CORS middleware
-	r.Use(func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "https://ticket-web-wu7p.onrender.com")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, PATCH, DELETE")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+	// r.Use(func(c *gin.Context) {
+	// 	c.Writer.Header().Set("Access-Control-Allow-Origin", "https://ticket-web-wu7p.onrender.com")
+	// 	c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, PATCH, DELETE")
+	// 	c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+	// 	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(204)
-			return
-		}
-		c.Next()
-	})
+	// 	if c.Request.Method == "OPTIONS" {
+	// 		c.AbortWithStatus(204)
+	// 		return
+	// 	}
+	// 	c.Next()
+	// })
+
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"*"}
+	config.AllowHeaders = []string{"Authorization", "Origin", "Content-Type", "Accept"}
+
+	r.Use(cors.New(config))
+
+	// r.Use(cors.New(cors.Config{
+	// 	AllowOrigins: []string{"https://ticket-web-wu7p.onrender.com", "http://192.168.1.57:9000/"},
+	// 	AllowMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
+	// 	AllowHeaders: []string{"Authorization"},
+	// }))
 
 	// Initialize handlers with JWT configuration
 	authHandler := handlers.NewAuthHandler(conn, []byte(cfg.JWT.Secret))
@@ -116,7 +130,7 @@ func main() {
 	// 	log.Fatal("Server failed to start:", err)
 	// }
 
-	if err := r.Run(); err != nil {
+	if err := r.Run(":9003"); err != nil {
 		log.Panicf("error: %s", err)
 	}
 }
